@@ -50,12 +50,16 @@ class CharactersViewController: UIViewController, UITableViewDataSource {
             }
             
             let characters = try! JSONDecoder().decode([Character].self, from: data!)
-            self.loadData(characters: characters)
+            DispatchQueue.main.async {
+                self.loadData(characters: characters)
+            }
             
         })
         task.resume()
     }
     
+    /// Loads provided Characters in the table. Must be called on the main queue.
+    /// - Parameter books: character objects to load
     func loadData(characters: [Character]) {
         cachedCharacters = characters
         tableView.reloadData()

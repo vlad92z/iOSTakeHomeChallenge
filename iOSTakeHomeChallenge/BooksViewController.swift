@@ -46,12 +46,15 @@ class BooksViewController: UIViewController, UITableViewDataSource {
             }
             
             let books = try! JSONDecoder().decode([Book].self, from: data!)
-            self.loadData(books: books)
-            
+            DispatchQueue.main.async {
+                self.loadData(books: books)
+            }
         })
         task.resume()
     }
     
+    /// Loads provided books in the table. Must be called on the main queue.
+    /// - Parameter books: book objects to load
     func loadData(books: [Book]) {
         cachedBooks = books
         tableView.reloadData()

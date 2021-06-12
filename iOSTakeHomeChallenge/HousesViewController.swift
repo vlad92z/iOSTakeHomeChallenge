@@ -51,12 +51,16 @@ class HousesViewController: UIViewController, UITableViewDataSource {
             }
             
             let houses = try! JSONDecoder().decode([House].self, from: data!)
-            self.loadData(houses: houses)
+            DispatchQueue.main.async {
+                self.loadData(houses: houses)
+            }
             
         })
         task.resume()
     }
     
+    /// Loads provided family houses in the table. Must be called on the main queue.
+    /// - Parameter books: house objects to load
     func loadData(houses: [House]) {
         cachedHouses = houses
         tableView.reloadData()
