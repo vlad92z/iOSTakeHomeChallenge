@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import os.log
 
 struct House: Codable {
     let url: String
@@ -46,15 +47,23 @@ class HousesViewController: UIViewController, UITableViewDataSource {
             "Content-Type": "application/json"
         ]
         let task = URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
-            if (error != nil) {
-                print("Oops")
+            if let networkError = error {
+                os_log(.error, "House network task failed with error: \(networkError.localizedDescription)")
             }
             
-            let houses = try! JSONDecoder().decode([House].self, from: data!)
-            DispatchQueue.main.async {
-                self.loadData(houses: houses)
+            guard let data = data else {
+                os_log(.error, "House network request returned no data")
+                return
             }
             
+            do {
+                let houses = try JSONDecoder().decode([House].self, from: data)
+                DispatchQueue.main.async {
+                    self.loadData(houses: houses)
+                }
+            } catch {
+                os_log(.error, "Failed to decode books with error: \(error.localizedDescription)")
+            }
         })
         task.resume()
     }
