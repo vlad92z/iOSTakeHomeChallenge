@@ -6,6 +6,9 @@
 //
 
 struct Book: Codable {
+    
+    static let dateFormat = "yyyy-MM-dd'T'HH:mm:ss" //2014-06-17T00:00:00
+    
     let url: String
     let name: String
     let isbn: String
@@ -14,12 +17,19 @@ struct Book: Codable {
     let publisher: String
     let country: String
     let mediaType: String
-    let released: String
+    let released: Date
     let characters: [String]
+    
+    static var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = dateFormat
+        return formatter
+    }
 }
 
 import Foundation
 import UIKit
+import os.log
 
 class BooksViewController: UIViewController, UITableViewDataSource {
     
@@ -41,14 +51,27 @@ class BooksViewController: UIViewController, UITableViewDataSource {
             "Content-Type": "application/json"
         ]
         let task = URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
-            if (error != nil) {
-                print("Oops")
+            if let networkError = error {
+                os_log(.error, "Book network task failed with error: \(networkError.localizedDescription)")
             }
             
-            let books = try! JSONDecoder().decode([Book].self, from: data!)
-            DispatchQueue.main.async {
-                self.loadData(books: books)
+            guard let data = data else {
+                os_log(.error, "Book network request returned no data")
+                return
             }
+            	
+            do {
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .formatted(Book.dateFormatter)
+                
+                let books = try decoder.decode([Book].self, from: data).sorted { $0.released < $1.released }
+                DispatchQueue.main.async {
+                    self.loadData(books: books)
+                }
+            } catch {
+                os_log(.error, "Failed to decode books with error: \(error.localizedDescription)")
+            }
+            
         })
         task.resume()
     }
@@ -78,9 +101,15 @@ class BooksTableViewCell: UITableViewCell {
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var pagesLabel: UILabel!
     
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM YYYY"
+        return formatter
+    }
+    
     func setupWith(book: Book) {
         titleLabel.text = book.name
-        dateLabel.text = book.released
-        pagesLabel.text =  String(book.numberOfPages)
+        dateLabel.text = dateFormatter.string(from: book.released)
+        pagesLabel.text =  "\(String(book.numberOfPages)) pages"
     }
 }
