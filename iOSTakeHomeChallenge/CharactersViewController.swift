@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import os.log
 
 struct Character: Codable {
     let url: String
@@ -24,6 +25,19 @@ struct Character: Codable {
     let povBooks: [String]
     let tvSeries: [String]
     let playedBy: [String]
+    
+    /// Returns a formatted string,for which seasons the character appeared in, e.g. "I-V, VII-VIII"
+    var seriesString: String {
+        var seriesIntegers = [Int]()
+        for series in tvSeries {
+            guard let seasonNumber = Int(series.replacingOccurrences(of: "Season ", with: "")) else {
+                os_log(.error, "Unexpected season format: %@", series)
+                continue
+            }
+            seriesIntegers.append(seasonNumber)
+        }
+        return Int.romanNumeralRangeString(for: seriesIntegers)
+    }
 }
 
 class CharactersViewController: UIViewController, UITableViewDataSource {
@@ -45,15 +59,23 @@ class CharactersViewController: UIViewController, UITableViewDataSource {
             "Content-Type": "application/json"
         ]
         let task = URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
-            if (error != nil) {
-                print("Oops")
+            if let networkError = error {
+                os_log(.error, "Character network task failed with error: \(networkError.localizedDescription)")
             }
             
-            let characters = try! JSONDecoder().decode([Character].self, from: data!)
-            DispatchQueue.main.async {
-                self.loadData(characters: characters)
+            guard let data = data else {
+                os_log(.error, "Character network request returned no data")
+                return
             }
             
+            do {
+                let characters = try JSONDecoder().decode([Character].self, from: data)
+                DispatchQueue.main.async {
+                    self.loadData(characters: characters)
+                }
+            } catch {
+                os_log(.error, "Failed to decode characters with error: \(error.localizedDescription)")
+            }
         })
         task.resume()
     }
@@ -89,29 +111,6 @@ class CharacterTableViewCell: UITableViewCell {
         cultureLabel.text = character.culture
         bornLabel.text = character.born
         diedLabel.text = character.died
-        
-        var seasons: String = ""
-        
-        for season in character.tvSeries {
-            if season == "Season 1" {
-                seasons.append("I ")
-            } else if season == "Season 2" {
-                seasons.append("II, ")
-            } else if season == "Season 3" {
-                seasons.append("III, ")
-            } else if season == "Season 4" {
-                seasons.append("IV, ")
-            } else if season == "Season 5" {
-                seasons.append("V, ")
-            } else if season == "Season 6" {
-                seasons.append("VI, ")
-            }  else if season == "Season 7" {
-                seasons.append("VII, ")
-            } else if season == "Season 8" {
-                seasons.append("VIII")
-            }
-        }
-        
-        seasonLabel.text = seasons
+        seasonLabel.text = character.seriesString
     }
 }
