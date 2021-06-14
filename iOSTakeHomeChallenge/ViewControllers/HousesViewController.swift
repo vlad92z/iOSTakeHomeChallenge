@@ -35,14 +35,14 @@ class HousesViewController: UITableViewController, SearchTermContaining {
     
     /// Requests the next page of houses
     func updateHouses() {
-        houseProvider.fetchData(for: currentPage) { houses, _ in
+        houseProvider.fetchData(for: currentPage) { [weak self] houses, _ in
             // In case an error occurs every time a given page is requested, we will increment regardless of success/error
-            self.currentPage += 1
+            self?.currentPage += 1
             guard let houses = houses else {
-                self.isLoading = false
+                self?.isLoading = false
                 return
             }
-            self.append(new: houses)
+            self?.append(new: houses)
             
         }
     }

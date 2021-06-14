@@ -36,17 +36,17 @@ class BooksViewController: UITableViewController, SearchTermContaining {
     
     /// Requests the next page of books
     func updateBooks() {
-        bookProvider.fetchData(for: currentPage) { books, _ in
+        bookProvider.fetchData(for: currentPage) { [weak self] books, _ in
             // In case an error occurs every time a given page is requested, we will increment regardless of success/error
-            self.currentPage += 1
+            self?.currentPage += 1
             guard let books = books else {
-                self.isLoading = false
+                self?.isLoading = false
                 return
             }
             if !books.isEmpty {
-                self.append(new: books)
+                self?.append(new: books)
             } else {
-                self.reachedEnd = true
+                self?.reachedEnd = true
             }
         }
     }

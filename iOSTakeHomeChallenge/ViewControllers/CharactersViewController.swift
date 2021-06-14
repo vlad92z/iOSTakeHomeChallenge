@@ -35,14 +35,14 @@ class CharactersViewController: UITableViewController, SearchTermContaining {
     
     /// Requests the next page of characters
     func updateCharacters() {
-        characterProvider.fetchData(for: currentPage) { characters, _ in
+        characterProvider.fetchData(for: currentPage) { [weak self] characters, _ in
             // In case an error occurs every time a given page is requested, we will increment regardless of success/error
-            self.currentPage += 1
+            self?.currentPage += 1
             guard let characters = characters else {
-                self.isLoading = false
+                self?.isLoading = false
                 return
             }
-            self.append(new: characters)
+            self?.append(new: characters)
             
         }
     }
