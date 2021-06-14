@@ -23,6 +23,8 @@
 		646A00122677F7C200179D37 /* GetRequestUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646A00112677F7C200179D37 /* GetRequestUtility.swift */; };
 		646A00142677FAB000179D37 /* URLProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646A00132677FAB000179D37 /* URLProviderTests.swift */; };
 		646A00162677FB6B00179D37 /* CharacterProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646A00152677FB6B00179D37 /* CharacterProviderTests.swift */; };
+		646A00182678026400179D37 /* SearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646A00172678026400179D37 /* SearchViewController.swift */; };
+		646A001A2678033F00179D37 /* SearchTermContaining.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646A00192678033F00179D37 /* SearchTermContaining.swift */; };
 		646AFFEB2677862800179D37 /* Int+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646AFFEA2677862800179D37 /* Int+Extension.swift */; };
 		646AFFF32677983900179D37 /* IntExtensionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646AFFF22677983900179D37 /* IntExtensionTests.swift */; };
 		646AFFFB2677AED200179D37 /* CharacterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646AFFFA2677AED200179D37 /* CharacterTests.swift */; };
@@ -57,6 +59,8 @@
 		646A00112677F7C200179D37 /* GetRequestUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetRequestUtility.swift; sourceTree = "<group>"; };
 		646A00132677FAB000179D37 /* URLProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLProviderTests.swift; sourceTree = "<group>"; };
 		646A00152677FB6B00179D37 /* CharacterProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterProviderTests.swift; sourceTree = "<group>"; };
+		646A00172678026400179D37 /* SearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewController.swift; sourceTree = "<group>"; };
+		646A00192678033F00179D37 /* SearchTermContaining.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTermContaining.swift; sourceTree = "<group>"; };
 		646AFFEA2677862800179D37 /* Int+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+Extension.swift"; sourceTree = "<group>"; };
 		646AFFF02677983900179D37 /* iOSTakeHomeChallengeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOSTakeHomeChallengeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		646AFFF22677983900179D37 /* IntExtensionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntExtensionTests.swift; sourceTree = "<group>"; };
@@ -123,6 +127,7 @@
 				117E69A825F7A39900E313E3 /* BooksViewController.swift */,
 				117E69AB25F7A3A600E313E3 /* HousesViewController.swift */,
 				117E69AE25F7A3B600E313E3 /* CharactersViewController.swift */,
+				646A00172678026400179D37 /* SearchViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -158,6 +163,7 @@
 				646AFFEA2677862800179D37 /* Int+Extension.swift */,
 				646A000D2677F66800179D37 /* URLProvider.swift */,
 				646A00112677F7C200179D37 /* GetRequestUtility.swift */,
+				646A00192678033F00179D37 /* SearchTermContaining.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -291,8 +297,10 @@
 				646A00102677F6A300179D37 /* PaginatedHashableObjectProvider.swift in Sources */,
 				646AFFEB2677862800179D37 /* Int+Extension.swift in Sources */,
 				646A00122677F7C200179D37 /* GetRequestUtility.swift in Sources */,
+				646A00182678026400179D37 /* SearchViewController.swift in Sources */,
 				646A000C2677D5EB00179D37 /* CharacterProvider.swift in Sources */,
 				117E699425F7A21E00E313E3 /* AppDelegate.swift in Sources */,
+				646A001A2678033F00179D37 /* SearchTermContaining.swift in Sources */,
 				117E699625F7A21E00E313E3 /* SceneDelegate.swift in Sources */,
 				646A00092677D53200179D37 /* CharacterTableViewCell.swift in Sources */,
 			);

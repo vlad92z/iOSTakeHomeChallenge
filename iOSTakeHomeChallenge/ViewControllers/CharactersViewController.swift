@@ -9,12 +9,19 @@ import Foundation
 import UIKit
 import os.log
 
-class CharactersViewController: UITableViewController {
+class CharactersViewController: UITableViewController, SearchTermContaining {
     
     // used for object provider pagination
     var currentPage = 1
     var isLoading = false
     var cachedCharacters: [Character] = []
+    var filteredCharacters: [Character] = []
+    
+    var searchTerm: String? {
+        didSet {
+            applySnapshot()
+        }
+    }
     
     var characterProvider = CharacterProvider()
     
@@ -85,7 +92,15 @@ private extension CharactersViewController {
     func applySnapshot(animated: Bool = true) {
         var snapshot = Snapshot()
         snapshot.appendSections([.characters])
-        snapshot.appendItems(cachedCharacters)
+        
+        if let searchTerm = searchTerm?.lowercased(), !searchTerm.isEmpty {
+            let filtered = cachedCharacters.filter { character in
+                character.name.lowercased().contains(searchTerm)
+            }
+            snapshot.appendItems(filtered)
+        } else {
+            snapshot.appendItems(cachedCharacters)
+        }
         dataSource.apply(snapshot, animatingDifferences: animated) {
             self.isLoading = false
         }

@@ -222,7 +222,7 @@
         <!--Characters-->
         <scene sceneID="otb-Ec-peB">
             <objects>
-                <viewController id="dZF-lQ-UsK" sceneMemberID="viewController">
+                <viewController id="dZF-lQ-UsK" customClass="SearchViewController" customModule="iOSTakeHomeChallenge" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="dgI-5c-0qR">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -231,37 +231,48 @@
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="813"/>
                             </imageView>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bLm-QP-nWt">
-                                <rect key="frame" x="0.0" y="44" width="414" height="769"/>
+                                <rect key="frame" x="0.0" y="95" width="414" height="718"/>
                                 <connections>
                                     <segue destination="vx4-hE-p2J" kind="embed" id="sAj-dj-d5i"/>
                                 </connections>
                             </containerView>
+                            <searchBar contentMode="redraw" placeholder="Search" translatesAutoresizingMaskIntoConstraints="NO" id="qKW-gS-bx9">
+                                <rect key="frame" x="0.0" y="44" width="414" height="51"/>
+                                <color key="barTintColor" white="0.048595935314685312" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <textInputTraits key="textInputTraits" returnKeyType="done"/>
+                            </searchBar>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="BeD-f8-Mi4"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="bLm-QP-nWt" firstAttribute="top" secondItem="BeD-f8-Mi4" secondAttribute="top" id="5J2-n0-z8X"/>
+                            <constraint firstItem="bLm-QP-nWt" firstAttribute="top" secondItem="qKW-gS-bx9" secondAttribute="bottom" id="5J2-n0-z8X"/>
                             <constraint firstItem="qEB-7T-5A3" firstAttribute="top" secondItem="dgI-5c-0qR" secondAttribute="top" id="5Nf-cC-fm1"/>
                             <constraint firstItem="BeD-f8-Mi4" firstAttribute="bottom" secondItem="qEB-7T-5A3" secondAttribute="bottom" id="CKj-MK-3Ja"/>
                             <constraint firstItem="bLm-QP-nWt" firstAttribute="leading" secondItem="BeD-f8-Mi4" secondAttribute="leading" id="NON-Vx-z6o"/>
                             <constraint firstItem="BeD-f8-Mi4" firstAttribute="trailing" secondItem="qEB-7T-5A3" secondAttribute="trailing" id="Qe3-he-qZK"/>
                             <constraint firstItem="BeD-f8-Mi4" firstAttribute="bottom" secondItem="bLm-QP-nWt" secondAttribute="bottom" id="Qid-4n-CIo"/>
+                            <constraint firstItem="qKW-gS-bx9" firstAttribute="top" secondItem="BeD-f8-Mi4" secondAttribute="top" id="aTL-5S-tTf"/>
                             <constraint firstItem="qEB-7T-5A3" firstAttribute="leading" secondItem="BeD-f8-Mi4" secondAttribute="leading" id="dGZ-xC-0rs"/>
+                            <constraint firstItem="qKW-gS-bx9" firstAttribute="leading" secondItem="BeD-f8-Mi4" secondAttribute="leading" id="dmP-pj-06l"/>
+                            <constraint firstItem="qKW-gS-bx9" firstAttribute="trailing" secondItem="BeD-f8-Mi4" secondAttribute="trailing" id="eh9-NP-5bU"/>
                             <constraint firstItem="BeD-f8-Mi4" firstAttribute="trailing" secondItem="bLm-QP-nWt" secondAttribute="trailing" id="vZB-Z2-BuF"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Characters" image="tabbarCharacters" selectedImage="tabbarCharactersActive" id="7K3-9A-uXX"/>
+                    <connections>
+                        <outlet property="searchBar" destination="qKW-gS-bx9" id="uDe-4X-lTK"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="kKE-II-lOZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-878" y="1054"/>
+            <point key="canvasLocation" x="-878.26086956521749" y="1053.3482142857142"/>
         </scene>
         <!--Characters View Controller-->
         <scene sceneID="HaK-yc-sr1">
             <objects>
                 <tableViewController id="vx4-hE-p2J" customClass="CharactersViewController" customModule="iOSTakeHomeChallenge" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="26g-vd-u2K">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="769"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="718"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <color key="separatorColor" systemColor="opaqueSeparatorColor"/>
