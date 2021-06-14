@@ -9,92 +9,101 @@ import Foundation
 import UIKit
 import os.log
 
-struct House: Codable {
-    let url: String
-    let name: String
-    let region: String
-    let coatOfArms: String
-    let words: String
-    let titles: [String]
-    let seats: [String]
-    let currentLord: String
-    let heir: String
-    let overlord: String
-    let founded: String
-    let founder: String
-    let diedOut: String
-    let ancestralWeapons: [String]
-    let cadetBranches: [String]
-    let swornMembers: [String]
-}
-
-class HousesViewController: UIViewController, UITableViewDataSource {
-    @IBOutlet weak var tableView: UITableView!
+class HousesViewController: UITableViewController, SearchTermContaining {
     
+    // used for object provider pagination
+    var currentPage = 1
+    var isLoading = false
     var cachedHouses: [House] = []
+    var filteredHouses: [House] = []
+    
+    var searchTerm: String? {
+        didSet {
+            applySnapshot()
+        }
+    }
+    
+    var houseProvider = HouseProvider()
+    
+    private lazy var dataSource = makeDataSource()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        getHouses()
+        tableView.dataSource = dataSource
+        updateHouses()
     }
     
-    func getHouses() {
-        var request = URLRequest(url: URL(string: "https://anapioficeandfire.com/api/houses")!)
-        request.httpMethod = "GET"
-        let config: URLSessionConfiguration = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 15
-        config.httpAdditionalHeaders = [
-            "Content-Type": "application/json"
-        ]
-        let task = URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
-            if let networkError = error {
-                os_log(.error, "House network task failed with error: \(networkError.localizedDescription)")
-            }
-            
-            guard let data = data else {
-                os_log(.error, "House network request returned no data")
+    /// Requests the next page of houses
+    func updateHouses() {
+        houseProvider.fetchData(for: currentPage) { houses, _ in
+            // In case an error occurs every time a given page is requested, we will increment regardless of success/error
+            self.currentPage += 1
+            guard let houses = houses else {
+                self.isLoading = false
                 return
             }
+            self.append(new: houses)
             
-            do {
-                let houses = try JSONDecoder().decode([House].self, from: data)
-                DispatchQueue.main.async {
-                    self.loadData(houses: houses)
-                }
-            } catch {
-                os_log(.error, "Failed to decode books with error: \(error.localizedDescription)")
-            }
-        })
-        task.resume()
+        }
     }
     
-    /// Loads provided family houses in the table. Must be called on the main queue.
-    /// - Parameter books: house objects to load
-    func loadData(houses: [House]) {
-        cachedHouses = houses
-        tableView.reloadData()
+    /// Appends new data to the existing list of houses
+    /// - Parameter houses: House objects to append
+    func append(new houses: [House]) {
+        cachedHouses.append(contentsOf: houses.filter({ house in
+            house.name != ""
+        }))
+        applySnapshot()
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        cachedHouses.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "HouseTableViewCell") as! HouseTableViewCell
-        cell.setupWith(house: cachedHouses[indexPath.row])
-        return cell
+    /// Used to automatically fetch more data, when the end of the tableview is reached
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        
+        if (offsetY > contentHeight - scrollView.frame.height) && !isLoading {
+            isLoading = true
+            updateHouses()
+        }
     }
 }
 
-class HouseTableViewCell: UITableViewCell {
+// MARK: UITableViewDiffableDataSource
+private extension HousesViewController {
     
-    @IBOutlet weak var nameLabel: UILabel!
-    @IBOutlet weak var regionLabel: UILabel!
-    @IBOutlet weak var wordsLabel: UILabel!
+    enum Section {
+        case houses
+    }
     
-    func setupWith(house: House) {
-        nameLabel.text = house.name
-        regionLabel.text = house.region
-        wordsLabel.text =  house.words
+    typealias DataSource = UITableViewDiffableDataSource<Section, House>
+    typealias Snapshot = NSDiffableDataSourceSnapshot<Section, House>
+    
+    func makeDataSource() -> DataSource {
+        return DataSource(
+            tableView: tableView,
+            cellProvider: { tableView, indexPath, house in
+                let cell = tableView.dequeueReusableCell(withIdentifier: "HouseTableViewCell") as! HouseTableViewCell
+                cell.setupWith(house: house)
+                return cell
+            }
+        )
+    }
+    
+    func applySnapshot(animated: Bool = true) {
+        var snapshot = Snapshot()
+        snapshot.appendSections([.houses])
+        
+        if let searchTerm = searchTerm?.lowercased(), !searchTerm.isEmpty {
+            let filtered = cachedHouses.filter { character in
+                character.name.lowercased().contains(searchTerm)
+            }
+            snapshot.appendItems(filtered)
+        } else {
+            snapshot.appendItems(cachedHouses)
+        }
+        dataSource.apply(snapshot, animatingDifferences: animated) {
+            self.isLoading = false
+        }
     }
 }
+

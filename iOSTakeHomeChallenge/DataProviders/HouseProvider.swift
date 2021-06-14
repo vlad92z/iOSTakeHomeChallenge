@@ -8,25 +8,25 @@
 import Foundation
 import os.log
 
-class CharacterProvider: PaginatedHashableObjectProvider {
+class HouseProvider: PaginatedHashableObjectProvider {
     
-    func fetchData(for page: Int, completionHandler: @escaping ([Character]?, Error?) -> Void) {
-        GetRequestUtility.performPaginatedGetRequest(urlProver: .characters, page: page) { (data, response, error) in
+    func fetchData(for page: Int, completionHandler: @escaping ([House]?, Error?) -> Void) {
+        GetRequestUtility.performPaginatedGetRequest(urlProver: .houses, page: page) { (data, response, error) in
             if let networkError = error {
-                os_log(.error, "Character network task failed with error: \(networkError.localizedDescription)")
+                os_log(.error, "House network task failed with error: \(networkError.localizedDescription)")
             }
             
             guard let data = data else {
-                os_log(.error, "Character network request returned no data")
+                os_log(.error, "House network request returned no data")
                 completionHandler(nil, error)
                 return
             }
             
             do {
-                let characters = try JSONDecoder().decode([Character].self, from: data)
-                completionHandler(characters, error)
+                let houses = try JSONDecoder().decode([House].self, from: data)
+                completionHandler(houses, error)
             } catch {
-                os_log(.error, "Failed to decode characters with error: \(error.localizedDescription)")
+                os_log(.error, "Failed to decode houses with error: \(error.localizedDescription)")
                 completionHandler(nil, error)
             }
         }

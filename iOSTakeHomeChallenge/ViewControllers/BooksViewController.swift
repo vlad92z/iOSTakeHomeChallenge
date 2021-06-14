@@ -5,111 +5,113 @@
 //  Created by James Malcolm on 09/03/2021.
 //
 
-struct Book: Codable {
-    
-    static let dateFormat = "yyyy-MM-dd'T'HH:mm:ss" //2014-06-17T00:00:00
-    
-    let url: String
-    let name: String
-    let isbn: String
-    let authors: [String]
-    let numberOfPages: Int
-    let publisher: String
-    let country: String
-    let mediaType: String
-    let released: Date
-    let characters: [String]
-    
-    static var dateFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateFormat = dateFormat
-        return formatter
-    }
-}
-
 import Foundation
 import UIKit
 import os.log
 
-class BooksViewController: UIViewController, UITableViewDataSource {
+class BooksViewController: UITableViewController, SearchTermContaining {
     
-    @IBOutlet weak var tableView: UITableView!
-    
+    // used for object provider pagination
+    var currentPage = 1
+    var isLoading = false
+    var reachedEnd = false
     var cachedBooks: [Book] = []
+    var filteredBooks: [Book] = []
+    
+    var searchTerm: String? {
+        didSet {
+            applySnapshot()
+        }
+    }
+    
+    var bookProvider = BookProvider()
+    
+    private lazy var dataSource = makeDataSource()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        getBooks()
+        tableView.dataSource = dataSource
+        updateBooks()
     }
     
-    func getBooks() {
-        var request = URLRequest(url: URL(string: "https://anapioficeandfire.com/api/books")!)
-        request.httpMethod = "GET"
-        let config: URLSessionConfiguration = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 15
-        config.httpAdditionalHeaders = [
-            "Content-Type": "application/json"
-        ]
-        let task = URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
-            if let networkError = error {
-                os_log(.error, "Book network task failed with error: \(networkError.localizedDescription)")
-            }
-            
-            guard let data = data else {
-                os_log(.error, "Book network request returned no data")
+    /// Requests the next page of books
+    func updateBooks() {
+        bookProvider.fetchData(for: currentPage) { books, _ in
+            // In case an error occurs every time a given page is requested, we will increment regardless of success/error
+            self.currentPage += 1
+            guard let books = books else {
+                self.isLoading = false
                 return
             }
-            	
-            do {
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .formatted(Book.dateFormatter)
-                
-                let books = try decoder.decode([Book].self, from: data).sorted { $0.released < $1.released }
-                DispatchQueue.main.async {
-                    self.loadData(books: books)
-                }
-            } catch {
-                os_log(.error, "Failed to decode books with error: \(error.localizedDescription)")
+            if !books.isEmpty {
+                self.append(new: books)
+            } else {
+                self.reachedEnd = true
             }
-            
-        })
-        task.resume()
+        }
     }
     
-    /// Loads provided books in the table. Must be called on the main queue.
-    /// - Parameter books: book objects to load
-    func loadData(books: [Book]) {
-        cachedBooks = books
-        tableView.reloadData()
+    /// Appends new data to the existing list of books
+    /// - Parameter characters: Book objects to append
+    func append(new books: [Book]) {
+        cachedBooks.append(contentsOf: books.filter({ book in
+            book.name != ""
+        }))
+        applySnapshot()
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        cachedBooks.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "BooksTableViewCell") as! BooksTableViewCell
-        cell.setupWith(book: cachedBooks[indexPath.row])
-        return cell
+    /// Used to automatically fetch more data, when the end of the tableview is reached
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard !reachedEnd else {
+            return
+        }
+        
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        
+        if (offsetY > contentHeight - scrollView.frame.height) && !isLoading {
+            isLoading = true
+            updateBooks()
+        }
     }
     
 }
 
-class BooksTableViewCell: UITableViewCell {
+// MARK: UITableViewDiffableDataSource
+private extension BooksViewController {
     
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var dateLabel: UILabel!
-    @IBOutlet weak var pagesLabel: UILabel!
-    
-    private var dateFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM YYYY"
-        return formatter
+    enum Section {
+        case books
     }
     
-    func setupWith(book: Book) {
-        titleLabel.text = book.name
-        dateLabel.text = dateFormatter.string(from: book.released)
-        pagesLabel.text =  "\(String(book.numberOfPages)) pages"
+    typealias DataSource = UITableViewDiffableDataSource<Section, Book>
+    typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Book>
+    
+    func makeDataSource() -> DataSource {
+        return DataSource(
+            tableView: tableView,
+            cellProvider: { tableView, indexPath, book in
+                let cell = tableView.dequeueReusableCell(withIdentifier: "BooksTableViewCell") as! BooksTableViewCell
+                cell.setupWith(book: book)
+                return cell
+            }
+        )
+    }
+    
+    func applySnapshot(animated: Bool = true) {
+        var snapshot = Snapshot()
+        snapshot.appendSections([.books])
+        
+        if let searchTerm = searchTerm?.lowercased(), !searchTerm.isEmpty {
+            let filtered = cachedBooks.filter { book in
+                book.name.lowercased().contains(searchTerm)
+            }
+            snapshot.appendItems(filtered)
+        } else {
+            snapshot.appendItems(cachedBooks)
+        }
+        dataSource.apply(snapshot, animatingDifferences: animated) {
+            self.isLoading = false
+        }
     }
 }
